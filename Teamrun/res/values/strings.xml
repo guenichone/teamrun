@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, TeamrunActivity!</string>
     <string name="app_name">Teamrun</string>
+    <string name="local_service_started">Logica Teamrun Service Started</string>
+    <string name="local_service_stopped">Logica Teamrun Service Stopped</string>
+    <string name="local_service_disconnected">Logica Teamrun Service has been disconnected.</string>
+    <string name="local_service_connected">Logica Teamrun Service has started.</string>
 
 </resources>
