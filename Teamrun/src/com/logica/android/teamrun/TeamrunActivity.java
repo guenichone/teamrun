@@ -1,5 +1,10 @@
 package com.logica.android.teamrun;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,28 +29,18 @@ import android.widget.Toast;
  */
 public class TeamrunActivity extends Activity {
 
-	private TeamrunDeamon deamon;
 	private boolean running = false;
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-	    public void onServiceConnected(ComponentName className, IBinder service) {
-	        // This is called when the connection with the service has been
-	        // established, giving us the service object we can use to
-	        // interact with the service.  Because we have bound to a explicit
-	        // service that we know is running in our own process, we can
-	        // cast its IBinder to a concrete class and directly access it.
-	    	deamon = ((TeamrunDeamon.LocalBinder)service).getService();
-	    	Toast.makeText(TeamrunActivity.this, R.string.local_service_connected, Toast.LENGTH_SHORT).show();
-	    }
-
-	    public void onServiceDisconnected(ComponentName className) {
-	        // This is called when the connection with the service has been
-	        // unexpectedly disconnected -- that is, its process crashed.
-	        // Because it is running in our same process, we should never
-	        // see this happen.
-	    	deamon = null;
-	        Toast.makeText(TeamrunActivity.this, R.string.local_service_disconnected, Toast.LENGTH_SHORT).show();
-	    }
+	private TeamrunDeamon deamon = null;
+	// Service connection used to bind service to this activity
+	private ServiceConnection serviceConnection = new ServiceConnection() {
+		
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			deamon = ((TeamrunDeamon.LocalBinder) service).getService();
+		}
+		
+		public void onServiceDisconnected(ComponentName name) {
+			deamon = null;
+		}
 	};
 	
 	/** Called when the activity is first created. */
@@ -54,25 +49,26 @@ public class TeamrunActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		// Bind buttons
+		// Bind test connection button
 		Button testButton = (Button) findViewById(R.id.testButton);
 		testButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// TODO Test connection with URL
+				testConnection();
 			}
 		});
 		
+		// Bind deamon button
 		final Button deamonButton = (Button) findViewById(R.id.deamonButton);
 		deamonButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (!running) {
 					Log.v("deamonButton : ", "connection");
-					doBindService();
-					deamonButton.setText("Stop Deamon");
+					runDeamon();
+					deamonButton.setText(R.string.stop_deamon);
 				} else {
 					Log.v("deamonButton : ", "disconnection");
-					doUnbindService();
-					deamonButton.setText("Start Deamon");
+					stopDeamon();
+					deamonButton.setText(R.string.start_deamon);
 				}
 			}
 		});
@@ -89,33 +85,64 @@ public class TeamrunActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 	    super.onDestroy();
-	    doUnbindService();
+	    stopDeamon();
 	}
 	
-	private void doBindService() {
-		// Establish a connection with the service.  We use an explicit
-	    // class name because we want a specific service implementation that
-	    // we know will be running in our own process (and thus won't be
-	    // supporting component replacement by other applications).
-	    bindService(new Intent(TeamrunActivity.this, TeamrunDeamon.class), mConnection, Context.BIND_AUTO_CREATE);
+	private void runDeamon() {
+		bindService(new Intent(TeamrunActivity.this, TeamrunDeamon.class), serviceConnection, BIND_AUTO_CREATE);
+	    //startService(new Intent(TeamrunActivity.this, TeamrunDeamon.class)); // Simple way without binding
+		if (deamon != null) {
+			EditText urlEditText = (EditText) findViewById(R.id.URL);
+			deamon.setUrl(urlEditText.getText().toString());
+			EditText teamEditText = (EditText) findViewById(R.id.TeamNumber);
+			deamon.setTeam(teamEditText.getText().toString());
+		} else {
+			Log.e("deamon : " , "Run failed ...");
+		}
+		
 	    running = true;
 	}
 	
-	private void doUnbindService() {
+	private void stopDeamon() {
 	    if (running) {
-	        // Detach our existing connection.
-	        unbindService(mConnection);
+	    	unbindService(serviceConnection);
+	    	//stopService(new Intent(TeamrunActivity.this, TeamrunDeamon.class)); // Simple way without binding
 	        running = false;
 	    }
 	}
 	
-	// BUTTONS METHODS
-	private void toggleRunDeamon() {
-		TeamrunDeamon deamon = new TeamrunDeamon();
+	/**
+	 * Test the network connection to the specified server. 
+	 */
+	private void testConnection() {
+		EditText urlEditText = (EditText) findViewById(R.id.URL);
+		String url = "http://" + urlEditText.getText().toString();
+		Log.v("testConnection : ", url);
 		
+		try {
+			HttpGet httpGet = new HttpGet(url);
+			HttpClient httpclient = new DefaultHttpClient();
+			
+			// Execute HTTP Get Request
+			HttpResponse response = httpclient.execute(httpGet);
+			// Check response status
+			int statusCode = response.getStatusLine().getStatusCode(); 
+			if (statusCode == 200) {
+				Toast.makeText(getApplicationContext(), "connection successful !", Toast.LENGTH_LONG).show();
+				Log.v("testConnection : ", "OK");
+			} else {
+				Toast.makeText(getApplicationContext(), "connection failed (" + url + ").", Toast.LENGTH_LONG).show();
+				Log.v("testConnection : ", String.valueOf(statusCode));
+			}
+        } catch (Exception e) {
+        	Toast.makeText(getApplicationContext(), "connection failed (" + url + ").", Toast.LENGTH_LONG).show();
+			Log.v("testConnection : ", e.toString());
+		}
 	}
 
-
+	/**
+	 * Initialize the locationListener and bind actions to EditText status and position.
+	 */
 	private void initLocationListener() {
 		// Acquire a reference to the system Location Manager
 		final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -162,8 +189,8 @@ public class TeamrunActivity extends Activity {
 	 */
 	private void setTextBoxPosition(Location location) {
     	final EditText xEditText = (EditText) findViewById(R.id.gpsX);
-    	xEditText.setText("" + location.getLatitude());
+    	xEditText.setText(String.valueOf(location.getLongitude()));
     	final EditText yEditText = (EditText) findViewById(R.id.gpsY);
-    	yEditText.setText("" + location.getLongitude());
+    	yEditText.setText(String.valueOf(location.getLatitude()));
     }
 }

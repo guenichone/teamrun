@@ -13,14 +13,15 @@
             android:id="@+id/textView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="URL"
+            android:text="@string/url"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
             android:id="@+id/URL"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" >
+            android:ems="10"
+            android:singleLine="true" >
 
             <requestFocus />
         </EditText>
@@ -29,61 +30,64 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TeamNumber"
+            android:text="@string/team_number"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
             android:id="@+id/TeamNumber"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:singleLine="true" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Current Position"
+            android:text="@string/current_position"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
             android:id="@+id/gpsX"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:ems="10" />
+            android:enabled="false"
+            android:ems="10" 
+            android:singleLine="true" />
 
         <EditText
             android:id="@+id/gpsY"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:ems="10" />
+            android:enabled="false"
+            android:ems="10" 
+            android:singleLine="true" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location Provider Status"
+            android:text="@string/location_provider_status"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
             android:id="@+id/LocationStatus"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
+            android:enabled="false"
             android:ems="10" />
 
         <Button
             android:id="@+id/testButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Test Connection" />
+            android:text="@string/test_connection" />
 
         <Button
             android:id="@+id/deamonButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Start Deamon" />
+            android:text="@string/start_deamon" />
 
     </LinearLayout>
 

@@ -5,5 +5,13 @@
     <string name="local_service_stopped">Logica Teamrun Service Stopped</string>
     <string name="local_service_disconnected">Logica Teamrun Service has been disconnected.</string>
     <string name="local_service_connected">Logica Teamrun Service has started.</string>
+    <string name="current_position">Current Position</string>
+    <string name="team_number">Team Number</string>
+    <string name="url">URL</string>
+    <string name="location_provider_status">Location Provider Status</string>
+    <string name="start_deamon">Start Deamon</string>
+    <string name="stop_deamon">Stop Deamon</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="error_server">Server is unvalaible.</string>
 
 </resources>
